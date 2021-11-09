@@ -9,11 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: mskelton/setup-yarn@v1.1.0
         with:
           node-version: 14
-      - uses: mskelton/setup-yarn@v1.1.0
       - run: yarn dist
       - name: Release exe
         uses: docker://antonyurchenko/git-release:latest
