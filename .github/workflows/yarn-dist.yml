@@ -13,9 +13,10 @@ jobs:
         with:
           node-version: 14
       - run: yarn dist
-      - name: Release exe
-        uses: docker://antonyurchenko/git-release:latest
+      - name: Release
+        uses: anton-yurchenko/git-release@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: dist/*.exe
+          args: |
+            dist/*.exe
