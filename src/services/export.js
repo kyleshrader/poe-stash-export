@@ -16,9 +16,9 @@ const formatExport = (items) => {
         const item = items[keys[i]]
         const name = keys[i]
         const quantity = item.quantity
-        result += `${name}\t${quantity}\t\t=B${i+2}*C${i+2}\n`
+        result += `${name}\t${quantity}\t\t=B:B*C:C\n`
     }
-    result += `\t\tTotal Value\t=SUM(D2:D${keys.length+1})`
+    result += `\n\nTotal Value\t=SUM(D:D)`
     return result
 }
 
