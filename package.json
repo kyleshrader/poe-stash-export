@@ -1,0 +1,29 @@
+{
+  "name": "stash-export",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "electron .",
+    "debug": "electron . debug",
+    "dist": "rm -rf dist/ && electron-builder --x64 --windows portable"
+  },
+  "build": {
+    "win": {
+      "extraResources": [
+        {
+          "from": "./build/",
+          "to": "./../"
+        }
+      ]
+    }
+  },
+  "author": "Kyle Shrader <kyle.r.shrader@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^15.3.1",
+    "electron-builder": "^22.13.1"
+  },
+  "dependencies": {
+    "axios": "^0.24.0"
+  }
+}
