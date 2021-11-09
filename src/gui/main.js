@@ -13,33 +13,44 @@ ipcRenderer.on('recieve-leagues', (event, leagues) => {
     leagueOption.text = league
     leagueSelectElement.add(leagueOption)
   })
+  ipcRenderer.send('get-config', 'selectedLeague')
 })
 
-// todo : get selected league
-leagueSelectElement.value = ''
-leagueSelectElement.onchange = async ({ target: {value} }) => {
-    // todo : set selected league
-    selectedTabIds = []
+ipcRenderer.on('receive-config', (event, data) => {
+  if(data.key === 'selectedLeague') {
+    leagueSelectElement.value = data.value || ''
     refreshStashTabs()
+  }
+})
+leagueSelectElement.onchange = async ({ target: {value} }) => {
+  ipcRenderer.send('set-config', 'selectedLeague', value)
+  selectedTabIds = []
+  refreshStashTabs()
 }
 
 // *** ACCOUNT *** //
 
 const accountInputElement = document.getElementById('account-input')
-// todo : get account
-accountInputElement.value = ''
+ipcRenderer.send('get-config', 'user.accountName')
+ipcRenderer.on('receive-config', (event, data) => {
+  if(data.key === 'user.accountName')
+    accountInputElement.value = data.value || ''
+})
 accountInputElement.oninput = async ({srcElement: {value}}) => {
-  // todo : set account
+  ipcRenderer.send('set-config', 'user.accountName', value)
   refreshStashTabs()
 }
 
 // *** SESSION ID *** //
 
 const sessionIdInputElement = document.getElementById('session-id-input')
-// todo : get session id
-sessionIdInputElement.value = ''
-sessionIdInputElement.oninput = async ({srcElement: {value}}) => {
-  ipcRenderer.send('set-session-id', sessionIdInputElement.value)
+ipcRenderer.send('get-config', 'user.sessionId')
+ipcRenderer.on('receive-config', (event, data) => {
+  if(data.key === 'user.sessionId')
+    sessionIdInputElement.value = data.value || ''
+})
+sessionIdInputElement.oninput = async ({srcElement: {value}}) => { 
+  ipcRenderer.send('set-config', 'user.sessionId', value)
   refreshStashTabs()
 }
 
@@ -93,14 +104,12 @@ document.getElementById('tabs').onclick = (event) => {
     const tabId = parseInt(element.dataset.index)
     if(isNaN(tabId)) return
 
-    // todo : get selected stash ids
     const tabIndex = selectedTabIds.indexOf(tabId)
     if(tabIndex > -1) selectedTabIds.splice(tabIndex, 1)
     else selectedTabIds.push(tabId)
 
     element.classList.toggle('btn-primary')
     element.classList.toggle('btn-success')
-    // todo : set selected stash ids
 }
 
 const exportButton = document.getElementById('export-btn')

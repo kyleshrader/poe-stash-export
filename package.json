@@ -1,5 +1,5 @@
 {
-  "name": "stash-export",
+  "name": "poe-stash-export",
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "electron-builder": "^22.13.1"
   },
   "dependencies": {
-    "axios": "^0.24.0"
+    "axios": "^0.24.0",
+    "electron-store": "^8.0.1"
   }
 }

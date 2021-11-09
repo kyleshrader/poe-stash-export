@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, clipboard } = require('electron')
+const Store = require('electron-store')
 const { fetchActiveLeagues } = require('./services/pathofexile/leagues')
 const { fetchStashTabs, fetchItemsFromStash } = require('./services/pathofexile/stash')
 const { reduceItems, formatExport } = require('./services/export.js')
@@ -8,12 +9,30 @@ const DEBUG_OPTIONS = { mode: 'detach' }
 
 let mainWindow
 
+const store = new Store({
+    name: 'poe-stash-export',
+    defaults: {
+        window: {
+            width: 350,
+            height: 750,
+            x: 100,
+            y: 100,
+        },
+        user: {
+            accountName: '',
+            sessionId: '',
+        },
+        selectedLeague: 'Standard',
+    }
+})
+
 function createMainWindow() {
+    const windowSettings = store.get('window')
     const windowOptions = {
-        width: 350,
-        height: 750,
-        x: 100,
-        y: 100,
+        width: store.get('window.width') || 350,
+        height: store.get('window.height') || 750,
+        x: store.get('window.x') || 100,
+        y: store.get('window.y') || 100,
         modal: true,
         alwaysOntop: false,
         webPreferences: {
@@ -28,6 +47,23 @@ function createMainWindow() {
     window.loadFile('./src/gui/main.html')
     window.setMenu(null)
     if (DEBUG) window.webContents.openDevTools(DEBUG_OPTIONS);
+
+    
+
+    window.on('resized', () => {
+        const size = window.getSize()
+        store.set('window.width', size[0])
+        store.set('window.height', size[1])
+        const pos = window.getPosition()
+        store.set('window.x', pos[0])
+        store.set('window.y', pos[1])
+    })
+
+    window.on('moved', () => {
+        const pos = window.getPosition()
+        store.set('window.x', pos[0])
+        store.set('window.y', pos[1])
+    })
 
     return window
 }
@@ -68,4 +104,12 @@ ipcMain.on('request-export', (event, data) => {
         clipboard.writeText(formattedData)
         event.sender.send('copied')
     })
+})
+
+ipcMain.on('get-config', (event, key) => {
+    event.sender.send('receive-config', { key, value: store.get(key) })
+})
+
+ipcMain.on('set-config', (event, key, value) => {
+    store.set(key, value)
 })
