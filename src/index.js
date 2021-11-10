@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, clipboard } = require('electron')
 const Store = require('electron-store')
 const { fetchActiveLeagues } = require('./services/pathofexile/leagues')
 const { fetchStashTabs, fetchItemsFromStash } = require('./services/pathofexile/stash')
-const { reduceItems, formatExport } = require('./services/export.js')
+const { reduceItems, priceItems, formatExport } = require('./services/export.js')
 
 const DEBUG = process.argv[2] === 'debug'
 const DEBUG_OPTIONS = { mode: 'detach' }
@@ -98,11 +98,14 @@ ipcMain.on('request-stash-tabs', (event, data) => {
 })
 
 ipcMain.on('request-export', (event, data) => {
+    if(data.tabIds.length == 0) return
     const items = fetchItemsFromStash(data.tabIds, data.account, data.league, data.sessionId).then((items) => {
         const reducedItems = reduceItems(items)
-        const formattedData = formatExport(reducedItems)
-        clipboard.writeText(formattedData)
-        event.sender.send('copied')
+        priceItems(reducedItems, data.league).then((items) => {
+            const formattedData = formatExport(items)
+            clipboard.writeText(formattedData)
+            event.sender.send('copied')
+        })
     })
 })
 

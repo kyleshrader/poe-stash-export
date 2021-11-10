@@ -1,3 +1,5 @@
+const { getAllCurrencyValues } = require('./poe-ninja/currency-overview')
+
 const reduceItems = (items) => {
     let result = {}
     items.forEach(item => {
@@ -9,6 +11,21 @@ const reduceItems = (items) => {
     return result
 }
 
+const priceItems = async (items, league) => {
+    const currencies = await getAllCurrencyValues(league)
+    currencies['Chaos Orb'] = 1
+    const priced = Object.assign({}, items)
+
+    Object.keys(priced).forEach((key) => {
+        const itemName = getName(priced[key])
+        if(Object.keys(currencies).includes(itemName)) {
+            priced[key].chaosValue = currencies[itemName]
+        }
+    })
+
+    return priced
+}
+
 const formatExport = (items) => {
     let result = 'Name\tQuantity\tValue Per\tValue\n'
     const keys = Object.keys(items)
@@ -16,7 +33,8 @@ const formatExport = (items) => {
         const item = items[keys[i]]
         const name = keys[i]
         const quantity = item.quantity
-        result += `${name}\t${quantity}\t\t=B:B*C:C\n`
+        const chaosValue = item.chaosValue || ''
+        result += `${name}\t${quantity}\t${chaosValue}\t=B:B*C:C\n`
     }
     result += `\n\nTotal Value\t=SUM(D:D)`
     return result
@@ -29,4 +47,4 @@ const getName = (item) => {
     return ''
 }
 
-module.exports = {reduceItems, formatExport}
+module.exports = {reduceItems, priceItems, formatExport}
