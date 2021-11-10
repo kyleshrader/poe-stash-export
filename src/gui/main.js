@@ -120,6 +120,19 @@ exportButton.onclick = (event) => {
   ipcRenderer.send('request-export', {tabIds: selectedTabIds, account, league, sessionId} )
 }
 
+const guildButton = document.getElementById('guild-btn')
+let useGuildStash = false
+guildButton.onclick = (event) => {
+  useGuildStash = !useGuildStash
+  ipcRenderer.send('set-guild-option', useGuildStash)
+}
+
+ipcRenderer.on('updated-guild-option', () => {
+  guildButton.classList.toggle('btn-primary')
+  guildButton.classList.toggle('btn-success')
+  refreshStashTabs()
+})
+
 ipcRenderer.on('copied', () => {
   exportButton.classList.remove('btn-primary')
   exportButton.classList.add('btn-success')

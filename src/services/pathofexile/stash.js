@@ -2,7 +2,8 @@ const axios = require('axios')
 axios.defaults.withCredentials = true
 
 
-const BASE_URL = 'https://www.pathofexile.com/character-window/get-stash-items'
+const PERSONAL_URL = 'https://www.pathofexile.com/character-window/get-stash-items'
+const GUILD_URL = 'https://www.pathofexile.com/character-window/get-guild-stash-items'
 const VALID_TAB_TYPES = [ 
     "NormalStash",
     "PremiuemStash",
@@ -10,9 +11,10 @@ const VALID_TAB_TYPES = [
 ]
 
 // Retrieve stash tabs
-const fetchStashTabs = async (accountName, leagueId, sessionId) => {
+const fetchStashTabs = async (accountName = '', leagueId = 'Standard', sessionId = '', useGuildStash = false) => {
     // `POESESSID=${sessionId}; Expires=null; Domain=pathofexile.com; Path=/; Secure; HttpOnly; SameSite=Lax`
-    const apiUrl = `${BASE_URL}?accountName=${accountName}&league=${leagueId}&tabs=1`
+    const baseUrl = useGuildStash ? GUILD_URL : PERSONAL_URL
+    const apiUrl = `${baseUrl}?accountName=${accountName}&league=${leagueId}&tabs=1`
     const response = await axios.get(apiUrl, getRequestOptions(sessionId))
     let tabs = response.data.tabs
     tabs = tabs.map(tab => ({
@@ -26,18 +28,19 @@ const fetchStashTabs = async (accountName, leagueId, sessionId) => {
 }
 
 // Retrieve stash items
-const fetchItemsFromStash = async (stashTabs, accountName, leagueId, sessionId) => {
+const fetchItemsFromStash = async (stashTabs, accountName, leagueId, sessionId, useGuildStash) => {
     if(!stashTabs) return []
     let itemsFromStash = []
     for(let i = 0; i < stashTabs.length; i++) {
-        const itemsFromTab = await fetchItemsFromTab(stashTabs[i], accountName, leagueId, sessionId)
+        const itemsFromTab = await fetchItemsFromTab(stashTabs[i], accountName, leagueId, sessionId, useGuildStash)
         itemsFromStash.push(...itemsFromTab)
     }
     return itemsFromStash
 }
 
-const fetchItemsFromTab = async (stashTab, accountName, leagueId, sessionId) => {
-    const apiUrl = `${BASE_URL}?accountName=${accountName}&league=${leagueId}&tabIndex=${stashTab}`
+const fetchItemsFromTab = async (stashTab, accountName, leagueId, sessionId, useGuildStash) => {
+    const baseUrl = useGuildStash ? GUILD_URL : PERSONAL_URL
+    const apiUrl = `${baseUrl}?accountName=${accountName}&league=${leagueId}&tabIndex=${stashTab}`
     const response = await axios.get(apiUrl, getRequestOptions(sessionId))
     const {items: rawItems} = response.data
     return rawItems.map(rawItem => ({

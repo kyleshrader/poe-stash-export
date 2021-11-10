@@ -89,8 +89,14 @@ ipcMain.on('request-leagues', (event) => {
     })
 })
 
+let useGuildStash = false;
+ipcMain.on('set-guild-option', (event, value) => {
+    useGuildStash = value
+    event.sender.send('updated-guild-option')
+})
+
 ipcMain.on('request-stash-tabs', (event, data) => {
-    fetchStashTabs(data.account, data.league, data.sessionId).then((stashTabs) => {
+    fetchStashTabs(data.account, data.league, data.sessionId, useGuildStash).then((stashTabs) => {
         event.sender.send('recieve-stash-tabs', stashTabs)
     }).catch((err) => {
         event.sender.send('recieve-stash-tabs', { err })
@@ -99,7 +105,7 @@ ipcMain.on('request-stash-tabs', (event, data) => {
 
 ipcMain.on('request-export', (event, data) => {
     if(data.tabIds.length == 0) return
-    const items = fetchItemsFromStash(data.tabIds, data.account, data.league, data.sessionId).then((items) => {
+    const items = fetchItemsFromStash(data.tabIds, data.account, data.league, data.sessionId, useGuildStash).then((items) => {
         const reducedItems = reduceItems(items)
         priceItems(reducedItems, data.league).then((items) => {
             const formattedData = formatExport(items)
