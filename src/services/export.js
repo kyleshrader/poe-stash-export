@@ -41,10 +41,11 @@ const formatExport = (items) => {
 }
 
 const getName = (item) => {
-    if(item.itemName !== '') return item.itemName
-    if(item.itemTypeLine !== '') return item.itemTypeLine
-    if(item.itemBaseType !== '') return item.itemBaseType
-    return ''
+    return item._rawItem.currencyTypeName
+        || item.itemName 
+        || item.itemTypeLine 
+        || item.itemBaseType 
+        || ''
 }
 
 module.exports = {reduceItems, priceItems, formatExport}
